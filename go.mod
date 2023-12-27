@@ -1,4 +1,4 @@
-module github.com/vedhavyas/go-subkey/v2
+module github.com/glant509/go-subkey/v2
 
 go 1.18
 
