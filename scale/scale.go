@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//nolint
+// nolint
 package scale
 
 import (
@@ -66,10 +66,12 @@ func (pe Encoder) PushByte(b byte) error {
 // A typical usage is storing the length of a collection.
 // Definition of compact encoding:
 // 0b00 00 00 00 / 00 00 00 00 / 00 00 00 00 / 00 00 00 00
-//   xx xx xx 00															(0 ... 2**6 - 1)		(u8)
-//   yL yL yL 01 / yH yH yH yL												(2**6 ... 2**14 - 1)	(u8, u16)  low LH high
-//   zL zL zL 10 / zM zM zM zL / zM zM zM zM / zH zH zH zM					(2**14 ... 2**30 - 1)	(u16, u32)  low LMMH high
-//   nn nn nn 11 [ / zz zz zz zz ]{4 + n}									(2**30 ... 2**536 - 1)	(u32, u64, u128, U256, U512, U520) straight LE-encoded
+//
+//	xx xx xx 00															(0 ... 2**6 - 1)		(u8)
+//	yL yL yL 01 / yH yH yH yL												(2**6 ... 2**14 - 1)	(u8, u16)  low LH high
+//	zL zL zL 10 / zM zM zM zL / zM zM zM zM / zH zH zH zM					(2**14 ... 2**30 - 1)	(u16, u32)  low LMMH high
+//	nn nn nn 11 [ / zz zz zz zz ]{4 + n}									(2**30 ... 2**536 - 1)	(u32, u64, u128, U256, U512, U520) straight LE-encoded
+//
 // Rust implementation: see impl<'a> Encode for CompactRef<'a, u64>
 func (pe Encoder) EncodeUintCompact(v big.Int) error {
 	if v.Sign() == -1 {
@@ -422,12 +424,12 @@ func (pd Decoder) DecodeIntoReflectValue(target reflect.Value) error {
 	// Slices: first compact-encode length, then each item individually
 	case reflect.Slice:
 		codedLen64, _ := pd.DecodeUintCompact()
-		if codedLen64.Uint64() > math.MaxUint32 {
+		if codedLen64.Uint64() > math.MaxUint64 {
 			return errors.New("encoded array length is higher than allowed by the protocol (32-bit unsigned integer)")
 		}
-		if codedLen64.Uint64() > uint64(maxInt) {
-			return errors.New("encoded array length is higher than allowed by the platform")
-		}
+		//if codedLen64.Uint64() > uint64(maxInt) {
+		//	return errors.New("encoded array length is higher than allowed by the platform")
+		//}
 		codedLen := int(codedLen64.Uint64())
 		targetLen := target.Len()
 		if codedLen != targetLen {
